@@ -6,7 +6,7 @@
         </v-main>
 
         <v-footer class="default-footer">
-            © 2025 Sua Empresa - Todos os direitos reservados
+            © 2025 ADIANTAMENTO - Todos os direitos reservados
         </v-footer>
     </v-app>
 </template>

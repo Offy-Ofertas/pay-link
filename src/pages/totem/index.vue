@@ -41,7 +41,6 @@
         justify-content: center;
         flex-direction: column;
         padding: 32px 16px;
-        background: radial-gradient(circle at top, #f2f6ff 0%, #e5ecff 45%, #fdfdff 100%);
         font-family: 'Inter', 'Roboto', sans-serif;
         color: #1f2a37;
     }

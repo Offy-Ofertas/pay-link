@@ -1,5 +1,5 @@
 <template>
-    <v-card class="pa-8 pa-md-10 text-center totem-card" elevation="10" rounded="xl">
+    <v-card class="pa-8 pa-md-10 text-center totem-card" elevation="10" rounded="0">
         <slot />
     </v-card>
 </template>

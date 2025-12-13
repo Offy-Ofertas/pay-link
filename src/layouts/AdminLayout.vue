@@ -41,7 +41,7 @@
 
         <!-- 🔹 Rodapé -->
         <v-footer app color="grey-lighten-4" height="48" class="text-grey text-center">
-            <v-col>© 2025 Sua Empresa — Todos os direitos reservados</v-col>
+            <v-col>© 2025 Adiantamento — Todos os direitos reservados</v-col>
         </v-footer>
     </v-app>
 </template>
