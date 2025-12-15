@@ -17,7 +17,7 @@
 
                     <div class="text-start mb-3">
                         <p class="mb-1 text-caption text-grey-darken-1">Valor</p>
-                        <p class="font-weight-medium">R$ {{ store.valor }},00</p>
+                        <p class="font-weight-medium">R$ {{ store.valor.valor }},00</p>
                     </div>
 
                     <div class="text-start">
@@ -59,7 +59,7 @@
     onMounted(() => {
         timer = setTimeout(() => {
             store.resetarFluxo();
-        }, 6000);
+        }, 10000);
     });
 
     onUnmounted(() => {

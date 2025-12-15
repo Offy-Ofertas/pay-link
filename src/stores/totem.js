@@ -9,6 +9,7 @@ import {
   buscarColaboradorPorCpf,
   buscarColaboradorPorId,
 } from "@/services/api/colaboradorService";
+import { verificarFace } from "@/services/api/faceService";
 
 export const useTotemStore = defineStore("totem", {
   state: () => ({
@@ -17,6 +18,9 @@ export const useTotemStore = defineStore("totem", {
     colaborador: null,
     codigoGerado: "",
     codigoExpirado: false,
+    faceStatus: "pendente",
+    faceSnapshot: "",
+    showFaceModal: false,
     valor: null,
     data: null,
     snackbar: { show: false, message: "", color: "success" },
@@ -35,6 +39,16 @@ export const useTotemStore = defineStore("totem", {
       setTimeout(() => {
         this.snackbar.show = false;
       }, 3000);
+    },
+    cancelarFace() {
+      this.showFaceModal = false;
+      this.faceStatus = "pendente";
+      this.faceSnapshot = "";
+      this.codigoGerado = "";
+      this.codigoExpirado = false;
+      this.colaborador = null;
+      this.cpf = "";
+      this.step = 2; // volta para o preenchimento de CPF
     },
 
     // ---------------------------------
@@ -55,6 +69,9 @@ export const useTotemStore = defineStore("totem", {
       this.colaborador = null;
       this.codigoGerado = "";
       this.codigoExpirado = false;
+      this.faceStatus = "pendente";
+      this.faceSnapshot = "";
+      this.showFaceModal = false;
       this.valor = null;
       this.data = null;
     },
@@ -152,13 +169,15 @@ export const useTotemStore = defineStore("totem", {
           cpf: formatarCpf(colaborador.cpf || this.cpf),
         };
         this.cpf = this.colaborador.cpf;
+        this.faceStatus = "pendente";
+        this.faceSnapshot = "";
+        this.showFaceModal = true;
 
         this.showSnackbar(
           `CPF validado com sucesso! Bem-vindo(a), ${this.colaborador.nome}`,
           "success"
         );
-
-        this.nextStep();
+        // o avanço para o próximo passo ocorre após reconhecimento facial aprovado
       } catch (error) {
         console.error("Erro ao validar CPF:", error);
         this.showSnackbar(
@@ -169,9 +188,63 @@ export const useTotemStore = defineStore("totem", {
     },
 
     // ---------------------------------
+    // Etapa 2.1 - Reconhecimento facial
+    // ---------------------------------
+    async validarFace({ imagemBase64, faceHash }) {
+      if (!this.colaborador?.id) {
+        this.showSnackbar("Colaborador inválido. Reinicie o fluxo.", "error");
+        return;
+      }
+
+      this.showFaceModal = false;
+      this.faceStatus = "verificando";
+
+      try {
+        const resultado = await verificarFace({
+          colaboradorId: this.colaborador.id,
+          cpf: this.colaborador.cpf,
+          imagemBase64,
+          faceHash,
+        });
+
+        this.faceSnapshot = imagemBase64;
+
+        if (resultado.status === "aprovado") {
+          this.faceStatus = "aprovado";
+          this.showSnackbar("Rosto reconhecido com sucesso!", "success");
+          this.showFaceModal = false;
+          this.goToStep(3);
+        } else if (resultado.status === "registrado") {
+          this.faceStatus = "aprovado";
+          this.showSnackbar("Face cadastrada e validada.", "success");
+          this.showFaceModal = false;
+          this.goToStep(3);
+        } else {
+          this.faceStatus = "reprovado";
+          this.showSnackbar("Rosto não reconhecido. Tente novamente.", "error");
+        }
+      } catch (error) {
+        console.error("Erro ao validar face:", error);
+        this.faceStatus = "erro";
+        this.showSnackbar(
+          error?.message || "Não foi possível validar o rosto.",
+          "error"
+        );
+      }
+    },
+
+    // ---------------------------------
     // Etapa 2 - Confirmar dados / enviar código
     // ---------------------------------
     async enviarCodigo() {
+      if (this.faceStatus !== "aprovado") {
+        this.showSnackbar(
+          "Finalize o reconhecimento facial para continuar.",
+          "warning"
+        );
+        return;
+      }
+
       this.codigoExpirado = false;
       const codigo = gerarCodigoNumerico();
       const expiraEm = new Date(Date.now() + 2 * 60 * 1000).toISOString();
