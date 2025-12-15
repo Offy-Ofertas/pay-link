@@ -44,8 +44,9 @@ export const useAdminStore = defineStore("admin", {
 
       try {
         const atualizado = await atualizarStatusApi(item.id, novoStatus);
-        if (atualizado?.processadoEm) {
-          item.processadoEm = atualizado.processadoEm;
+        if (atualizado?.processadoEm || atualizado?.processado_em) {
+          item.processadoEm =
+            atualizado.processadoEm || atualizado.processado_em;
         } else if (novoStatus !== "PENDENTE") {
           item.processadoEm = new Date().toISOString();
         }

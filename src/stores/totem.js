@@ -136,13 +136,18 @@ export const useTotemStore = defineStore("totem", {
 
         const canceladaRecente = solicitacoesDoCpf?.find((s) => {
           if (s.status !== "CANCELADA") return false;
-          const referencia = s.processadoEm || s.criadoEm;
+          const referencia =
+            s.processadoEm || s.processado_em || s.criadoEm || s.criado_em;
           if (!referencia) return false;
           return calcularDiasDesde(referencia) < 15;
         });
 
         if (canceladaRecente) {
-          const referencia = canceladaRecente.processadoEm || canceladaRecente.criadoEm;
+          const referencia =
+            canceladaRecente.processadoEm ||
+            canceladaRecente.processado_em ||
+            canceladaRecente.criadoEm ||
+            canceladaRecente.criado_em;
           const diasDecorridos = calcularDiasDesde(referencia);
           const diasRestantes = Math.max(1, 15 - diasDecorridos);
           const dataLiberacao = adicionarDias(referencia, 15);
@@ -255,7 +260,8 @@ export const useTotemStore = defineStore("totem", {
           this.colaborador?.id,
           {
             ...this.colaborador,
-            codigoValidacao: { codigo, expiraEm },
+            codigo_validacao_codigo: codigo,
+            codigo_validacao_expira_em: expiraEm,
           }
         );
 
@@ -301,8 +307,12 @@ export const useTotemStore = defineStore("totem", {
           ? await buscarColaboradorPorId(this.colaborador.id)
           : null;
 
-        const codigoSalvo = colaboradorAtual?.codigoValidacao?.codigo;
-        const expiraEm = colaboradorAtual?.codigoValidacao?.expiraEm;
+        const codigoSalvo =
+          colaboradorAtual?.codigo_validacao_codigo ||
+          colaboradorAtual?.codigo_validacao?.codigo;
+        const expiraEm =
+          colaboradorAtual?.codigo_validacao_expira_em ||
+          colaboradorAtual?.codigo_validacao?.expiraEm;
         const expirado = expiraEm
           ? new Date(expiraEm).getTime() < Date.now()
           : false;

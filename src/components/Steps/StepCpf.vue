@@ -19,14 +19,14 @@
             variant="underlined" 
             rounded="0" 
             density="default" 
-            maxlength="14" 
+            maxlength="14" CP
             hide-details 
             autofocus 
             @input="maskCpf"
             clearable
         />
 
-        <div class="actions d-flex flex-wrap justify-center" style="gap: 16px;">
+        <div class="actions d-flex flex-wrap justify-ceCPF n~nter" style="gap: 16px;">
             <v-btn 
                 variant="outlined" 
                 color="grey-darken-1" 

@@ -14,9 +14,9 @@
                         <p><strong>CPF:</strong> {{ solicitacao.cpf }}</p>
                         <p><strong>Valor:</strong> {{ solicitacao.valor }}</p>
                         <p><strong>Data do pagamento:</strong> {{ solicitacao.data }}</p>
-                        <p><strong>Solicitado em:</strong> {{ formatarDataHora(solicitacao.criadoEm) }}</p>
-                        <p v-if="solicitacao.processadoEm"><strong>Processado em:</strong>
-                            {{ formatarDataHora(solicitacao.processadoEm) }}</p>
+                        <p><strong>Solicitado em:</strong> {{ formatarDataHora(solicitacao.criado_em || solicitacao.criadoEm) }}</p>
+                        <p v-if="solicitacao.processadoEm || solicitacao.processado_em"><strong>Processado em:</strong>
+                            {{ formatarDataHora(solicitacao.processadoEm || solicitacao.processado_em) }}</p>
                     </v-col>
 
                     <v-col cols="12" md="6">
@@ -35,13 +35,13 @@
 
                 <v-alert v-else-if="ehAprovada" type="success" variant="tonal" class="mb-4">
                     Esta solicitação foi aprovada em
-                    <strong>{{ formatarDataHora(solicitacao.processadoEm) }}</strong>. As informações abaixo são apenas
+                    <strong>{{ formatarDataHora(solicitacao.processadoEm || solicitacao.processado_em) }}</strong>. As informações abaixo são apenas
                     para consulta.
                 </v-alert>
 
                 <v-alert v-else-if="ehCancelada" type="warning" variant="tonal" class="mb-4">
                     Esta solicitação foi cancelada em
-                    <strong>{{ formatarDataHora(solicitacao.processadoEm) }}</strong>.
+                    <strong>{{ formatarDataHora(solicitacao.processadoEm || solicitacao.processado_em) }}</strong>.
                     <div v-if="diasRestantesCancelada > 0" class="mt-2">
                         Faltam <strong>{{ diasRestantesCancelada }} dia(s)</strong> para que o colaborador possa fazer
                         uma nova solicitação (liberação prevista para {{ dataLiberacaoFormatada }}). Caso seja
@@ -142,7 +142,7 @@
             return { diasRestantes: 0, liberacao: null };
         }
 
-        const referencia = solicitacao.value?.processadoEm || solicitacao.value?.criadoEm;
+        const referencia = solicitacao.value?.processado_em || solicitacao.value?.criado_em;
         if (!referencia) {
             return { diasRestantes: 0, liberacao: null };
         }
