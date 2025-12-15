@@ -4,7 +4,11 @@ import {
   criarSolicitacao,
   listarSolicitacoes,
 } from "@/services/api/financeiroService";
-import { buscarColaboradorPorCpf } from "@/services/api/colaboradorService";
+import {
+  atualizarColaborador,
+  buscarColaboradorPorCpf,
+  buscarColaboradorPorId,
+} from "@/services/api/colaboradorService";
 
 export const useTotemStore = defineStore("totem", {
   state: () => ({
@@ -12,6 +16,7 @@ export const useTotemStore = defineStore("totem", {
     cpf: "",
     colaborador: null,
     codigoGerado: "",
+    codigoExpirado: false,
     valor: null,
     data: null,
     snackbar: { show: false, message: "", color: "success" },
@@ -49,6 +54,7 @@ export const useTotemStore = defineStore("totem", {
       this.cpf = "";
       this.colaborador = null;
       this.codigoGerado = "";
+      this.codigoExpirado = false;
       this.valor = null;
       this.data = null;
     },
@@ -166,7 +172,33 @@ export const useTotemStore = defineStore("totem", {
     // Etapa 2 - Confirmar dados / enviar código
     // ---------------------------------
     async enviarCodigo() {
-      this.codigoGerado = "123456"; // código fixo para testes
+      this.codigoExpirado = false;
+      const codigo = gerarCodigoNumerico();
+      const expiraEm = new Date(Date.now() + 2 * 60 * 1000).toISOString();
+      this.codigoGerado = codigo;
+
+      try {
+        const colaboradorAtualizado = await atualizarColaborador(
+          this.colaborador?.id,
+          {
+            ...this.colaborador,
+            codigoValidacao: { codigo, expiraEm },
+          }
+        );
+
+        this.colaborador = {
+          ...colaboradorAtualizado,
+          cpf: formatarCpf(colaboradorAtualizado.cpf || this.cpf),
+        };
+      } catch (error) {
+        console.error("Erro ao salvar código:", error);
+        this.showSnackbar(
+          "Não foi possível gerar o código. Tente novamente.",
+          "error"
+        );
+        return;
+      }
+
       if (this.colaborador?.email) {
         try {
           await enviarCodigoPorEmail({
@@ -174,6 +206,7 @@ export const useTotemStore = defineStore("totem", {
             nome: this.colaborador.nome,
             codigo: this.codigoGerado,
           });
+          console.log("Código enviado por e-mail com sucesso.");
         } catch (error) {
           console.warn("Envio real de e-mail não configurado:", error);
         }
@@ -190,13 +223,44 @@ export const useTotemStore = defineStore("totem", {
     // Etapa 3 - Validação do código
     // ---------------------------------
     async validarCodigo(codigoDigitado) {
-      const codigoCorreto = this.codigoGerado || "123456";
+      try {
+        const colaboradorAtual = this.colaborador?.id
+          ? await buscarColaboradorPorId(this.colaborador.id)
+          : null;
 
-      if (codigoDigitado === codigoCorreto) {
-        this.showSnackbar("Código validado com sucesso!", "success");
-        this.nextStep();
-      } else {
-        this.showSnackbar("Código incorreto. Tente novamente.", "error");
+        const codigoSalvo = colaboradorAtual?.codigoValidacao?.codigo;
+        const expiraEm = colaboradorAtual?.codigoValidacao?.expiraEm;
+        const expirado = expiraEm
+          ? new Date(expiraEm).getTime() < Date.now()
+          : false;
+
+        if (expirado || !codigoSalvo) {
+          this.codigoExpirado = expirado;
+          const mensagem = expirado
+            ? "Codigo expirado, por favor, gere outro"
+            : "Código inválido. Gere um novo código.";
+          this.showSnackbar(mensagem, "error");
+          return;
+        }
+
+        if (codigoDigitado === codigoSalvo) {
+          this.codigoExpirado = false;
+          this.showSnackbar("Código validado com sucesso!", "success");
+          this.colaborador = {
+            ...colaboradorAtual,
+            cpf: formatarCpf(colaboradorAtual?.cpf || this.cpf),
+          };
+          this.nextStep();
+        } else {
+          this.codigoExpirado = false;
+          this.showSnackbar("Código incorreto. Tente novamente.", "error");
+        }
+      } catch (error) {
+        console.error("Erro ao validar código:", error);
+        this.showSnackbar(
+          "Não foi possível validar o código. Tente novamente.",
+          "error"
+        );
       }
     },
 
@@ -247,6 +311,10 @@ function formatarMoeda(valor) {
   const numero = Number(valor);
   if (Number.isNaN(numero)) return valor;
   return formatadorMoeda.format(numero);
+}
+
+function gerarCodigoNumerico() {
+  return String(Math.floor(100000 + Math.random() * 900000));
 }
 
 function formatarCpf(cpf) {

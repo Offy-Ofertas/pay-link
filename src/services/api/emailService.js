@@ -1,4 +1,5 @@
 // src/services/api/emailService.js
+import emailjs from "@emailjs/browser";
 
 const EMAIL_ENDPOINT = "https://api.emailjs.com/api/v1.0/email/send";
 
@@ -19,22 +20,24 @@ export async function enviarCodigoPorEmail({ to, nome, codigo }) {
     return;
   }
 
-  const payload = {
-    service_id: serviceId,
-    template_id: templateId,
-    user_id: publicKey,
-    template_params: {
-      to_email: to,
-      to_name: nome || "Colaborador",
-      codigo,
-    },
+  const templateParams = {
+    email: to,
+    passcode: codigo,
+    name: nome || "Colaborador",
   };
 
   try {
-    const response = await fetch(EMAIL_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+    emailjs.send(
+      serviceId,
+      templateId,
+      templateParams,
+      publicKey
+    )
+    .then(() => {
+      toast.success("Mensagem enviada! Entrarei em contato em breve.");
+    })
+    .catch(() => {
+      toast.error("Erro ao enviar mensagem. Tente novamente.");
     });
 
     if (!response.ok) {

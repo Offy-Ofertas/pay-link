@@ -1,7 +1,5 @@
 {
-  "solicitacoes": [
-
-  ],
+  "solicitacoes": [],
   "colaboradores": [
     {
       "id": "col-001",
@@ -9,11 +7,15 @@
       "cpf": "070.507.963-52",
       "cargo": "Analista de Vendas",
       "departamento": "Comercial",
-      "email": "joaosilva@hotmail.com",
+      "email": "eliasbragga44@gmail.com",
       "telefone": "(11) 98765-4321",
       "salario": "R$ 3.500,00",
       "admissao": "2023-05-10",
-      "demissao": null
+      "demissao": null,
+      "codigoValidacao": {
+        "codigo": "730525",
+        "expiraEm": "2025-12-15T01:28:48.051Z"
+      }
     }
   ],
   "usuarios": [

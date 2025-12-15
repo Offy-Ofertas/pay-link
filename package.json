@@ -11,6 +11,7 @@
     "lint": "eslint . --fix"
   },
   "dependencies": {
+    "@emailjs/browser": "^4.4.1",
     "@fontsource/roboto": "5.2.7",
     "@mdi/font": "7.4.47",
     "apexcharts": "^5.3.6",

@@ -16,6 +16,7 @@
         <!-- Campo de código -->
         <v-text-field v-model="codigo" label="Insira o código de 6 dígitos" type="text" maxlength="6" class="mt-6"
             variant="outlined" hide-details density="comfortable"
+            :disabled="codigoExpirado"
             style="font-size: 1.5rem; letter-spacing: 6px; text-align: center;" />
 
         <!-- Link de reenvio -->
@@ -27,7 +28,14 @@
         </div>
 
         <!-- Botões -->
-        <div class="d-flex justify-space-between mt-8">
+        <div v-if="codigoExpirado" class="d-flex justify-center mt-8">
+            <v-btn color="primary" rounded="lg" size="large" elevation="3" class="w-100 text-none font-weight-medium"
+                @click="reenviarCodigo">
+                Reenviar código
+            </v-btn>
+        </div>
+
+        <div v-else class="d-flex justify-space-between mt-8">
             <v-btn variant="outlined" color="grey-darken-1" rounded="lg" size="large"
                 class="w-45 text-none font-weight-medium" @click="store.prevStep()">
                 Voltar
@@ -44,10 +52,11 @@
 <script setup>
     import BaseCard from '@/components/Shared/BaseCard.vue'
     import { useTotemStore } from '@/stores/totem'
-    import { ref } from 'vue'
+    import { ref, computed } from 'vue'
 
     const store = useTotemStore()
     const codigo = ref('')
+    const codigoExpirado = computed(() => store.codigoExpirado)
     function mascararEmail(email) {
         if (!email) return ''
         const [nome, dominio] = email.split('@')
@@ -64,6 +73,7 @@
 
     function reenviarCodigo() {
         store.enviarCodigo()
+        codigo.value = ''
     }
 </script>
 
@@ -94,5 +104,9 @@
 
     .w-45 {
         width: 48%;
+    }
+
+    .w-100 {
+        width: 100%;
     }
 </style>

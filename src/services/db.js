@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:4000";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 async function request(path, options = {}) {
   const config = {
@@ -97,6 +97,7 @@ export async function getColaboradorById(id) {
 export async function getColaboradorByCpf(cpf) {
   const somenteDigitos = (cpf || "").replace(/\D/g, "");
   const lista = await listColaboradores();
+  console.log(lista);
 
   return lista.find(
     (colab) =>
