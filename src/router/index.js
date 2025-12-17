@@ -8,6 +8,7 @@ import SolicitacoesValidar from "@/pages/admin/solicitacoesValidar.vue";
 import AdminColaboradores from "@/pages/admin/colaborador.vue";
 import ColaboradorForm from "@/pages/admin/colaboradorForm.vue";
 import LoginPage from "@/pages/login.vue";
+import AssinaturaPage from "@/pages/assinatura.vue";
 
 const routes = [
   { path: "/", redirect: "/totem" },
@@ -52,6 +53,13 @@ const routes = [
 
   // --- Login ---
   { path: "/login", name: "Login", component: LoginPage },
+
+  // --- Assinatura eletrônica ---
+  {
+    path: "/assinatura-eletronica",
+    name: "AssinaturaEletronica",
+    component: AssinaturaPage,
+  },
 
   // --- Rota padrão 404 ---
   { path: "/:pathMatch(.*)*", redirect: "/totem" },

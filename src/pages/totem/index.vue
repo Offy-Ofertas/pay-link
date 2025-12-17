@@ -1,7 +1,6 @@
 <template>
     <div class="totem-shell">
         <component :is="currentStep" />
-        <FaceModal />
         <BaseSnackbar />
     </div>
 </template>
@@ -17,7 +16,6 @@
     import StepValue from "@/components/Steps/StepValue.vue";
     import StepDate from "@/components/Steps/StepDate.vue";
     import StepSuccess from "@/components/Steps/StepSuccess.vue";
-    import FaceModal from "@/components/Shared/FaceModal.vue";
     import BaseSnackbar from "@/components/Shared/BaseSnackbar.vue";
 
     const store = useTotemStore();

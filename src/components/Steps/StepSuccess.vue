@@ -29,8 +29,8 @@
                 <!-- Alerta -->
                 <v-alert type="info" variant="tonal" class="mb-6 text-body-2 d-flex align-center justify-center"
                     rounded="lg">
-                    <v-icon size="18" color="primary" class="mr-2">mdi-whatsapp</v-icon>
-                    Você receberá uma mensagem no WhatsApp com a confirmação.
+                    <v-icon size="18" color="primary" class="mr-2">mdi-email-outline</v-icon>
+                    Você receberá um e-mail com o link para autenticar e assinar o documento.
                 </v-alert>
 
                 <!-- Botão -->

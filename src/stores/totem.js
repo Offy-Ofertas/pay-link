@@ -1,5 +1,8 @@
 import { defineStore } from "pinia";
-import { enviarCodigoPorEmail } from "@/services/api/emailService";
+import {
+  enviarCodigoPorEmail,
+  enviarLinkAssinaturaEmail,
+} from "@/services/api/emailService";
 import {
   criarSolicitacao,
   listarSolicitacoes,
@@ -23,6 +26,7 @@ export const useTotemStore = defineStore("totem", {
     showFaceModal: false,
     valor: null,
     data: null,
+    assinaturaEmailEnviado: false,
     snackbar: { show: false, message: "", color: "success" },
   }),
 
@@ -74,6 +78,7 @@ export const useTotemStore = defineStore("totem", {
       this.showFaceModal = false;
       this.valor = null;
       this.data = null;
+      this.assinaturaEmailEnviado = false;
     },
 
     // ---------------------------------
@@ -174,15 +179,15 @@ export const useTotemStore = defineStore("totem", {
           cpf: formatarCpf(colaborador.cpf || this.cpf),
         };
         this.cpf = this.colaborador.cpf;
-        this.faceStatus = "pendente";
+        this.faceStatus = "aprovado";
         this.faceSnapshot = "";
-        this.showFaceModal = true;
+        this.showFaceModal = false;
 
         this.showSnackbar(
           `CPF validado com sucesso! Bem-vindo(a), ${this.colaborador.nome}`,
           "success"
         );
-        // o avanço para o próximo passo ocorre após reconhecimento facial aprovado
+        this.goToStep(3);
       } catch (error) {
         console.error("Erro ao validar CPF:", error);
         this.showSnackbar(
@@ -373,6 +378,7 @@ export const useTotemStore = defineStore("totem", {
           valor: this.valor,
           data,
         });
+        await this.enviarEmailAssinatura();
         this.goToStep(7); // vai direto para a tela de sucesso
       } catch (error) {
         console.error("Erro ao registrar solicitação:", error);
@@ -380,6 +386,35 @@ export const useTotemStore = defineStore("totem", {
           error?.message || "Erro ao registrar a solicitação. Tente novamente.",
           error?.message ? "warning" : "error"
         );
+      }
+    },
+    async enviarEmailAssinatura() {
+      if (!this.colaborador?.email || this.assinaturaEmailEnviado) return;
+
+      const baseUrl = "http://localhost:3001";
+      const params = new URLSearchParams();
+      const valorParam = formatarValorParaUrl(this.valor?.valor ?? this.valor);
+
+      if (valorParam) params.set("valor", valorParam);
+      if (this.colaborador?.nome) {
+        params.set("nome", this.colaborador.nome);
+        params.set("assinatura", this.colaborador.nome);
+      }
+      if (this.data) params.set("data", this.data);
+      if (this.colaborador?.cpf) params.set("cpf", this.colaborador.cpf);
+      if (this.colaborador?.id) params.set("colaboradorId", this.colaborador.id);
+
+      const link = `${baseUrl}/assinatura-eletronica?${params.toString()}`;
+
+      try {
+        await enviarLinkAssinaturaEmail({
+          to: this.colaborador.email,
+          nome: this.colaborador.nome,
+          link,
+        });
+        this.assinaturaEmailEnviado = true;
+      } catch (error) {
+        console.warn("Falha ao enviar e-mail de assinatura:", error);
       }
     },
   },
@@ -394,6 +429,14 @@ function formatarMoeda(valor) {
   const numero = Number(valor);
   if (Number.isNaN(numero)) return valor;
   return formatadorMoeda.format(numero);
+}
+
+function formatarValorParaUrl(valor) {
+  const numero = Number(valor);
+  if (!Number.isNaN(numero)) {
+    return numero.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
+  }
+  return valor ? String(valor) : "";
 }
 
 function gerarCodigoNumerico() {
