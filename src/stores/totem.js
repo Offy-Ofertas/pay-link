@@ -391,7 +391,7 @@ export const useTotemStore = defineStore("totem", {
     async enviarEmailAssinatura() {
       if (!this.colaborador?.email || this.assinaturaEmailEnviado) return;
 
-      const baseUrl = "http://localhost:3001";
+      const baseUrl = "https://relaxed-swan-110b67.netlify.app";
       const params = new URLSearchParams();
       const valorParam = formatarValorParaUrl(this.valor?.valor ?? this.valor);
 
