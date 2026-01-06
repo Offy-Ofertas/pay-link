@@ -265,7 +265,7 @@ export const useTotemStore = defineStore("totem", {
           this.colaborador?.id,
           {
             ...this.colaborador,
-            codigo_validacao_codigo: codigo,
+            codigo_validacao: codigo,
             codigo_validacao_expira_em: expiraEm,
           }
         );
@@ -313,7 +313,7 @@ export const useTotemStore = defineStore("totem", {
           : null;
 
         const codigoSalvo =
-          colaboradorAtual?.codigo_validacao_codigo ||
+          colaboradorAtual?.codigo_validacao ||
           colaboradorAtual?.codigo_validacao?.codigo;
         const expiraEm =
           colaboradorAtual?.codigo_validacao_expira_em ||
