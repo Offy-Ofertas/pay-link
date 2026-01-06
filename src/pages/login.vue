@@ -42,8 +42,7 @@
                                 <p>Entre com suas credenciais para acessar o painel administrativo.</p>
                             </div>
 
-                            <v-btn-toggle v-model="modo" mandatory class="tabs-toggle mb-6" color="primary"
-                                divided>
+                            <v-btn-toggle v-model="modo" mandatory class="tabs-toggle mb-6" color="primary" divided>
                                 <v-btn value="login" class="text-none font-weight-medium">
                                     Entrar
                                 </v-btn>
@@ -65,7 +64,8 @@
                                         @click:append-inner="toggleSenhaLogin" hide-details />
 
                                     <div class="d-flex align-center justify-space-between">
-                                        <v-checkbox-btn v-model="lembrar" label="Lembrar acesso" color="primary" density="compact" />
+                                        <v-checkbox-btn v-model="lembrar" label="Lembrar acesso" color="primary"
+                                            density="compact" />
                                         <v-btn variant="text" class="text-primary text-none px-0">
                                             Esqueci minha senha
                                         </v-btn>
@@ -85,11 +85,12 @@
 
                             <div v-else>
                                 <v-form @submit.prevent="cadastrarUsuario" class="d-flex flex-column ga-4">
-                                    <v-text-field v-model="novoNome" label="Nome completo" variant="solo-filled" rounded="lg"
-                                        prepend-inner-icon="mdi-account" density="comfortable" hide-details />
+                                    <v-text-field v-model="novoNome" label="Nome completo" variant="solo-filled"
+                                        rounded="lg" prepend-inner-icon="mdi-account" density="comfortable"
+                                        hide-details />
 
-                                    <v-text-field v-model="novoUsuario" label="Usuário" variant="solo-filled" rounded="lg"
-                                        prepend-inner-icon="mdi-email" density="comfortable"
+                                    <v-text-field v-model="novoUsuario" label="Usuário" variant="solo-filled"
+                                        rounded="lg" prepend-inner-icon="mdi-email" density="comfortable"
                                         placeholder="nome.sobrenome@empresa.com" hide-details />
 
                                     <v-text-field v-model="novaSenha" :type="mostrarSenhaCadastro ? 'text' : 'password'"
@@ -98,8 +99,9 @@
                                         :append-inner-icon="mostrarSenhaCadastro ? 'mdi-eye-off' : 'mdi-eye'"
                                         @click:append-inner="toggleSenhaCadastro" hide-details />
 
-                                    <v-text-field v-model="confirmaSenha" :type="mostrarSenhaCadastro ? 'text' : 'password'"
-                                        label="Confirmar senha" variant="solo-filled" rounded="lg" density="comfortable"
+                                    <v-text-field v-model="confirmaSenha"
+                                        :type="mostrarSenhaCadastro ? 'text' : 'password'" label="Confirmar senha"
+                                        variant="solo-filled" rounded="lg" density="comfortable"
                                         prepend-inner-icon="mdi-lock-check" hide-details />
 
                                     <BaseButton :disabled="!podeCadastrar || criando" :loading="criando"
@@ -109,8 +111,7 @@
                                 </v-form>
 
                                 <v-alert v-if="cadastroSucesso" type="success" class="mt-4" border="start"
-                                    border-color="success" variant="tonal" closable
-                                    @click:close="cadastroSucesso = ''">
+                                    border-color="success" variant="tonal" closable @click:close="cadastroSucesso = ''">
                                     {{ cadastroSucesso }}
                                 </v-alert>
 
@@ -128,201 +129,204 @@
 </template>
 
 <script setup>
-    import { computed, ref, watch } from 'vue'
-    import { useRouter } from 'vue-router'
-    import DefaultLayout from '@/layouts/DefaultLayout.vue'
-    import BaseButton from '@/components/Shared/BaseButton.vue'
-    import { useAuthStore } from '@/stores/auth'
+import { computed, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import DefaultLayout from '@/layouts/DefaultLayout.vue'
+import BaseButton from '@/components/Shared/BaseButton.vue'
+import { useAuthStore } from '@/stores/auth'
 
-    const router = useRouter()
-    const auth = useAuthStore()
+const router = useRouter()
+const auth = useAuthStore()
 
-    const modo = ref('login')
-    const username = ref('')
-    const password = ref('')
-    const lembrar = ref(false)
-    const mostrarSenhaLogin = ref(false)
-    const autenticando = ref(false)
-    const erro = ref('')
+const modo = ref('login')
+const username = ref('')
+const password = ref('')
+const lembrar = ref(false)
+const mostrarSenhaLogin = ref(false)
+const autenticando = ref(false)
+const erro = ref('')
 
-    const novoNome = ref('')
-    const novoUsuario = ref('')
-    const novaSenha = ref('')
-    const confirmaSenha = ref('')
-    const mostrarSenhaCadastro = ref(false)
-    const criando = ref(false)
-    const cadastroErro = ref('')
-    const cadastroSucesso = ref('')
+const novoNome = ref('')
+const novoUsuario = ref('')
+const novaSenha = ref('')
+const confirmaSenha = ref('')
+const mostrarSenhaCadastro = ref(false)
+const criando = ref(false)
+const cadastroErro = ref('')
+const cadastroSucesso = ref('')
 
-    const podeEntrar = computed(() => username.value.trim() && password.value.trim())
-    const podeCadastrar = computed(
-        () =>
-            novoNome.value.trim() &&
-            novoUsuario.value.trim() &&
-            novaSenha.value.trim() &&
-            confirmaSenha.value.trim()
-    )
+const podeEntrar = computed(() => username.value.trim() && password.value.trim())
+const podeCadastrar = computed(
+    () =>
+        novoNome.value.trim() &&
+        novoUsuario.value.trim() &&
+        novaSenha.value.trim() &&
+        confirmaSenha.value.trim()
+)
 
-    watch([username, password], () => {
-        if (erro.value) erro.value = ''
-    })
+watch([username, password], () => {
+    if (erro.value) erro.value = ''
+})
 
-    watch([novoNome, novoUsuario, novaSenha, confirmaSenha], () => {
-        if (cadastroErro.value) cadastroErro.value = ''
-    })
+watch([novoNome, novoUsuario, novaSenha, confirmaSenha], () => {
+    if (cadastroErro.value) cadastroErro.value = ''
+})
 
-    watch(modo, () => {
-        erro.value = ''
-        cadastroErro.value = ''
-        cadastroSucesso.value = ''
-    })
+watch(modo, () => {
+    erro.value = ''
+    cadastroErro.value = ''
+    cadastroSucesso.value = ''
+})
 
-    function toggleSenhaLogin() {
-        mostrarSenhaLogin.value = !mostrarSenhaLogin.value
-    }
+function toggleSenhaLogin() {
+    mostrarSenhaLogin.value = !mostrarSenhaLogin.value
+}
 
-    function toggleSenhaCadastro() {
-        mostrarSenhaCadastro.value = !mostrarSenhaCadastro.value
-    }
+function toggleSenhaCadastro() {
+    mostrarSenhaCadastro.value = !mostrarSenhaCadastro.value
+}
 
-    function limparCamposCadastro() {
-        novoNome.value = ''
-        novoUsuario.value = ''
-        novaSenha.value = ''
-        confirmaSenha.value = ''
-    }
+function limparCamposCadastro() {
+    novoNome.value = ''
+    novoUsuario.value = ''
+    novaSenha.value = ''
+    confirmaSenha.value = ''
+}
 
-    async function handleLogin() {
-        if (!podeEntrar.value || autenticando.value) return
+async function handleLogin() {
+    if (!podeEntrar.value || autenticando.value) return
 
-        erro.value = ''
-        autenticando.value = true
+    erro.value = ''
+    autenticando.value = true
 
-        try {
-            const ok = await auth.login({
-                username: username.value.trim(),
-                password: password.value.trim(),
-                remember: lembrar.value,
-            })
+    try {
+        const ok = await auth.login({
+            username: username.value.trim(),
+            password: password.value.trim(),
+            remember: lembrar.value,
+        })
 
-            if (!ok) {
-                erro.value = 'Usuário ou senha inválidos.'
-                return
-            }
-
-            router.push('/admin')
-        } catch (e) {
-            console.error('Erro de autenticação:', e)
-            erro.value = 'Não foi possível conectar. Tente novamente.'
-        } finally {
-            autenticando.value = false
-        }
-    }
-
-    async function cadastrarUsuario() {
-        if (!podeCadastrar.value || criando.value) return
-
-        if (novaSenha.value !== confirmaSenha.value) {
-            cadastroErro.value = 'As senhas não conferem.'
+        if (!ok) {
+            erro.value = 'Usuário ou senha inválidos.'
             return
         }
 
-        criando.value = true
-        cadastroErro.value = ''
-        cadastroSucesso.value = ''
-
-        try {
-            await auth.cadastrarUsuario({
-                nome: novoNome.value.trim(),
-                username: novoUsuario.value.trim(),
-                password: novaSenha.value.trim(),
-            })
-            cadastroSucesso.value = 'Usuário criado com sucesso! Utilize seus dados para entrar.'
-            username.value = novoUsuario.value.trim()
-            password.value = ''
-            modo.value = 'login'
-            limparCamposCadastro()
-        } catch (error) {
-            console.error('Erro ao cadastrar usuário:', error)
-            cadastroErro.value = error.message || 'Não foi possível criar o usuário.'
-        } finally {
-            criando.value = false
-        }
+        router.push('/admin')
+    } catch (e) {
+        console.error('Erro de autenticação:', e)
+        erro.value = 'Não foi possível conectar. Tente novamente.'
+    } finally {
+        autenticando.value = false
     }
+}
+
+async function cadastrarUsuario() {
+    if (!podeCadastrar.value || criando.value) return
+
+    if (novaSenha.value !== confirmaSenha.value) {
+        cadastroErro.value = 'As senhas não conferem.'
+        return
+    }
+
+    criando.value = true
+    cadastroErro.value = ''
+    cadastroSucesso.value = ''
+
+    try {
+        await auth.cadastrarUsuario({
+            nome: novoNome.value.trim(),
+            username: novoUsuario.value.trim(),
+            password: novaSenha.value.trim(),
+        })
+        cadastroSucesso.value = 'Usuário criado com sucesso! Utilize seus dados para entrar.'
+        username.value = novoUsuario.value.trim()
+        password.value = ''
+        modo.value = 'login'
+        limparCamposCadastro()
+    } catch (error) {
+        console.error('Erro ao cadastrar usuário:', error)
+        cadastroErro.value = error.message || 'Não foi possível criar o usuário.'
+    } finally {
+        criando.value = false
+    }
+}
 </script>
 
 <style scoped>
-    .login-page {
-        background: radial-gradient(circle at top, #e3f2fd, #e1f5fe, #e8eaf6);
-        padding: 24px;
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+.login-page {
+    min-height: 90vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-    .login-card {
-        max-width: 960px;
-        width: 100%;
-        border-radius: 28px;
-        overflow: hidden;
-    }
+.login-card {
+    max-width: 960px;
+    width: 100%;
 
-    .hero-col {
-        background: linear-gradient(135deg, #1a49ff, #0d2fb8);
-        color: #fff;
-    }
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
 
-    .hero-content {
-        padding: 48px;
-    }
+    border-radius: 0;
+}
 
-    .hero-content h2 {
-        font-size: 2rem;
-        font-weight: 600;
-        margin-bottom: 16px;
-    }
 
-    .hero-content p {
-        font-size: 1rem;
-        color: rgba(255, 255, 255, 0.85);
-    }
+.hero-col {
+    background: linear-gradient(135deg, #1a49ff, #0d2fb8);
+    color: #fff;
+}
 
-    .hero-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        color: #fff;
-    }
+.hero-content {
+    padding: 48px;
+}
 
-    .hero-list li {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-weight: 500;
-    }
+.hero-content h2 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
 
+.hero-content p {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.hero-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    color: #fff;
+}
+
+.hero-list li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+.form-wrapper {
+    padding: 48px 40px;
+}
+
+.form-wrapper h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.form-wrapper p {
+    color: #5c6b7a;
+    margin: 0;
+}
+
+@media (max-width: 960px) {
     .form-wrapper {
-        padding: 48px 40px;
+        padding: 0px 20px;
     }
-
-    .form-wrapper h1 {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #1a1a1a;
-    }
-
-    .form-wrapper p {
-        color: #5c6b7a;
-        margin: 0;
-    }
-
-    @media (max-width: 960px) {
-        .form-wrapper {
-            padding: 32px 24px 40px;
-        }
-    }
+}
 </style>

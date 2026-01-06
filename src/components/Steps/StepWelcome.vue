@@ -20,7 +20,7 @@
         </BaseButton>
         
         <p class="text-caption mt-8 text-grey-darken-1">
-            © 2025 - Todos os direitos reservados
+            © 2025 - Microcrédito
         </p>
     </BaseCard>
 </template>

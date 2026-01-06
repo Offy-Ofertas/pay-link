@@ -22,6 +22,7 @@ declare module 'vue-router/auto-routes' {
     '/admin/colaboradorForm': RouteRecordInfo<'/admin/colaboradorForm', '/admin/colaboradorForm', Record<never, never>, Record<never, never>>,
     '/admin/solicitacoes': RouteRecordInfo<'/admin/solicitacoes', '/admin/solicitacoes', Record<never, never>, Record<never, never>>,
     '/admin/solicitacoesValidar': RouteRecordInfo<'/admin/solicitacoesValidar', '/admin/solicitacoesValidar', Record<never, never>, Record<never, never>>,
+    '/assinatura': RouteRecordInfo<'/assinatura', '/assinatura', Record<never, never>, Record<never, never>>,
     '/login': RouteRecordInfo<'/login', '/login', Record<never, never>, Record<never, never>>,
     '/totem/': RouteRecordInfo<'/totem/', '/totem', Record<never, never>, Record<never, never>>,
   }
@@ -51,6 +52,10 @@ declare module 'vue-router/auto-routes' {
     }
     'src/pages/admin/solicitacoesValidar.vue': {
       routes: '/admin/solicitacoesValidar'
+      views: never
+    }
+    'src/pages/assinatura.vue': {
+      routes: '/assinatura'
       views: never
     }
     'src/pages/login.vue': {
