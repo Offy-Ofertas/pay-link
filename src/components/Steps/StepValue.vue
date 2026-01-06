@@ -45,7 +45,7 @@
           R$ {{ maxValor.toLocaleString('pt-BR') }}.
         </v-alert>
 
-        <v-alert
+        <!-- <v-alert
           v-if="isValorValido && selectedValue > 0"
           type="warning"
           variant="tonal"
@@ -56,7 +56,7 @@
           Valor solicitado: R$ {{ formatarValorDisplay(selectedValue) }}<br />
           Taxa (10%): R$ {{ formatarValorDisplay(valorTaxa) }}<br />
           <strong>Total:</strong> R$ {{ formatarValorDisplay(valorTotalComTaxa) }}
-        </v-alert>
+        </v-alert> -->
 
         <div v-if="isValorValido && selectedValue" class="mt-6">
           <div class="parcelas-title">
