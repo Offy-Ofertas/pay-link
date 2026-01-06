@@ -51,7 +51,7 @@
     import { useRouter, useRoute } from "vue-router";
     import { useAuthStore } from "@/stores/auth";
 
-    const drawer = ref(true);
+    const drawer = ref(false);
     const router = useRouter();
     const route = useRoute();
     const auth = useAuthStore();
