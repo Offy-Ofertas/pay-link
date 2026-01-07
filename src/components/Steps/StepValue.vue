@@ -147,15 +147,11 @@ const parcelas = ref(null);
 const dialogInfo = ref(false);
 
 const minValor = 100;
-const percentualJuros = 0.1;
 
 const selectedValue = computed(() => {
   if (!valorInput.value) return 0;
   return Number(valorInput.value.replace(/\./g, "").replace(",", "."));
 });
-
-const valorTaxa = computed(() => selectedValue.value * percentualJuros);
-const valorTotalComTaxa = computed(() => selectedValue.value + valorTaxa.value);
 
 const salarioNumerico = computed(() => {
   if (!store.colaborador?.salario) return 0;
@@ -185,7 +181,7 @@ watch(selectedValue, () => {
 });
 
 function calcularParcela(qtd) {
-  return (valorTotalComTaxa.value / qtd).toLocaleString("pt-BR", {
+  return (selectedValue.value / qtd).toLocaleString("pt-BR", {
     minimumFractionDigits: 2,
   });
 }
@@ -207,9 +203,9 @@ function regrasValor() {
 
 function avancar() {
   store.selecionarValor({
-    valor: valorTotalComTaxa.value,
+    valor: selectedValue.value,
     valorBase: selectedValue.value,
-    taxa: valorTaxa.value,
+    taxa: 0,
     parcelas: parcelas.value,
   });
 }
