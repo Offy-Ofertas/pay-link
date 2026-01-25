@@ -8,6 +8,8 @@
                     :active="route.path === '/admin/solicitacoes'" @click="goTo('/admin/solicitacoes')" />
                 <v-list-item prepend-icon="mdi-account-multiple" title="Colaboradores"
                     :active="route.path.startsWith('/admin/colaboradores')" @click="goTo('/admin/colaboradores')" />
+                <v-list-item prepend-icon="mdi-clipboard-text" title="Relatorios"
+                    :active="route.path === '/admin/relatorios'" @click="goTo('/admin/relatorios')" />
             </v-list>
         </v-navigation-drawer>
 

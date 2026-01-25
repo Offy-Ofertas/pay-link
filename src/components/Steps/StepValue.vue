@@ -10,14 +10,15 @@
         <v-icon color="primary" size="56">mdi-cash-multiple</v-icon>
 
         <h3 class="title">
-          Escolha o valor desejado
+          Escolha o valor do credito
         </h3>
 
         <v-alert type="info" variant="tonal" class="mb-6" rounded="lg">
-          Você pode solicitar entre
+          Voce pode solicitar entre
           <strong>R$ {{ minValor.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) }}</strong>
           e
-          <strong>R$ {{ maxValor.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) }}</strong>.
+          <strong>R$ {{ maxValor.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) }}</strong>
+          (18% do salario).
         </v-alert>
 
         <v-text-field
@@ -118,12 +119,12 @@
     <!-- MODAL INFO -->
     <v-dialog v-model="dialogInfo" max-width="400">
       <v-card rounded="lg">
-        <v-card-title class="bg-primary text-white">
-          Informação de Pagamento
+      <v-card-title class="bg-primary text-white">
+          Informacao de Pagamento
         </v-card-title>
         <v-card-text class="py-5">
-          O pagamento das parcelas será feito por
-          <strong>desconto direto na folha</strong>.
+          O valor total inclui <strong>15% de acrescimo</strong> e sera descontado
+          direto na folha.
         </v-card-text>
         <v-card-actions class="justify-end">
           <v-btn color="primary" @click="dialogInfo = false">Entendi</v-btn>
@@ -134,10 +135,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, watch } from "vue";
 import { useDisplay } from "vuetify";
 import { useTotemStore } from "@/stores/totem";
-import { buscarColaboradorPorCpf } from "@/services/api/colaboradorService";
 
 const { smAndDown } = useDisplay();
 const store = useTotemStore();
@@ -154,11 +154,13 @@ const selectedValue = computed(() => {
 });
 
 const salarioNumerico = computed(() => {
-  if (!store.colaborador?.salario) return 0;
-  return Number(store.colaborador.salario.replace(/[R$\.\s]/g, "").replace(",", "."));
+  const salario = store.colaboradorRh?.salario;
+  if (!salario) return 0;
+  if (typeof salario === "number") return salario;
+  return Number(String(salario).replace(/[R$\.\s]/g, "").replace(",", "."));
 });
 
-const maxValor = computed(() => Math.floor(salarioNumerico.value * 0.15));
+const maxValor = computed(() => Math.floor(salarioNumerico.value * 0.18));
 
 const isValorValido = computed(() => {
   return selectedValue.value >= minValor && selectedValue.value <= maxValor.value;
@@ -181,7 +183,8 @@ watch(selectedValue, () => {
 });
 
 function calcularParcela(qtd) {
-  return (selectedValue.value / qtd).toLocaleString("pt-BR", {
+  const total = selectedValue.value * 1.15;
+  return (total / qtd).toLocaleString("pt-BR", {
     minimumFractionDigits: 2,
   });
 }
@@ -190,11 +193,10 @@ function formatarValor(valor) {
   return `R$ ${valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
 }
 
-function formatarValorDisplay(valor) {
-  return valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
-}
-
 function regrasValor() {
+  if (maxValor.value < minValor) {
+    return "Limite nao disponivel para solicitacao.";
+  }
   if (!isValorValido.value) {
     return `Valor entre R$ ${minValor} e R$ ${maxValor.value}`;
   }
@@ -203,17 +205,10 @@ function regrasValor() {
 
 function avancar() {
   store.selecionarValor({
-    valor: selectedValue.value,
-    valorBase: selectedValue.value,
-    taxa: 0,
+    valorSolicitado: selectedValue.value,
     parcelas: parcelas.value,
   });
 }
-
-onMounted(async () => {
-  const cpfLimpo = store.cpf.replace(/\D/g, "");
-  store.colaborador = await buscarColaboradorPorCpf(cpfLimpo);
-});
 </script>
 
 <style scoped>

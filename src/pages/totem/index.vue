@@ -9,28 +9,48 @@
     import { computed } from "vue";
     import { useTotemStore } from "@/stores/totem";
 
+    import { onMounted } from "vue";
+    import { useRoute } from "vue-router";
+
     import StepWelcome from "@/components/Steps/StepWelcome.vue";
-    import StepCpf from "@/components/Steps/StepCpf.vue";
-    import StepConfirmData from "@/components/Steps/StepConfirmData.vue";
-    import StepCodeValidation from "@/components/Steps/StepCodeValidation.vue";
+    import StepLogin from "@/components/Steps/StepLogin.vue";
+    import StepFirstAccess from "@/components/Steps/StepFirstAccess.vue";
+    import StepFirstAccessSuccess from "@/components/Steps/StepFirstAccessSuccess.vue";
+    import StepPasswordChange from "@/components/Steps/StepPasswordChange.vue";
+    import StepRequestStatus from "@/components/Steps/StepRequestStatus.vue";
+    import StepEligibility from "@/components/Steps/StepEligibility.vue";
     import StepValue from "@/components/Steps/StepValue.vue";
-    import StepDate from "@/components/Steps/StepDate.vue";
-    import StepSuccess from "@/components/Steps/StepSuccess.vue";
+    import StepConfirmRequest from "@/components/Steps/StepConfirmRequest.vue";
+    import StepRequestSuccess from "@/components/Steps/StepRequestSuccess.vue";
     import BaseSnackbar from "@/components/Shared/BaseSnackbar.vue";
 
     const store = useTotemStore();
 
+    const route = useRoute();
     const steps = {
         1: StepWelcome,
-        2: StepCpf,
-        3: StepConfirmData,
-        4: StepCodeValidation,
-        5: StepValue,
-        6: StepDate,
-        7: StepSuccess,
+        2: StepLogin,
+        3: StepFirstAccess,
+        4: StepFirstAccessSuccess,
+        5: StepPasswordChange,
+        6: StepRequestStatus,
+        7: StepEligibility,
+        8: StepValue,
+        9: StepConfirmRequest,
+        10: StepRequestSuccess,
     };
 
     const currentStep = computed(() => steps[store.step]);
+
+    onMounted(() => {
+        if (route.query?.["primeiro-acesso"] === "1") {
+            store.marcarPrimeiroAcessoEmail(true);
+            store.goToStep(2);
+        }
+        if (route.query?.login) {
+            store.login.login = String(route.query.login);
+        }
+    });
 </script>
 
 <style scoped>

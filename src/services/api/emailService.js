@@ -81,3 +81,95 @@ async function enviarAssinaturaMock({ to, nome, link, assunto }) {
   );
   return new Promise((resolve) => setTimeout(resolve, 300));
 }
+
+export async function enviarCredenciaisPrimeiroAcessoEmail({
+  to,
+  nome,
+  login,
+  senha,
+  link,
+}) {
+  if (!to) {
+    throw new Error("E-mail do destinatário é obrigatório.");
+  }
+
+  const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+  const templateId = "template_nlnp763";
+  const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+
+  if (!serviceId || !templateId || !publicKey) {
+    await enviarMockPrimeiroAcesso({ to, nome, login, senha, link, assunto });
+    return;
+  }
+
+  const templateParams = {
+    email: to,
+    name: nome || "Colaborador",
+    username: login,
+    password: senha,
+    link,
+  };
+
+  try {
+    await emailjs.send(serviceId, templateId, templateParams, publicKey);
+  } catch (error) {
+    console.error("[EmailService] Falha no envio real, usando mock:", error);
+    await enviarMockPrimeiroAcesso({ to, nome, login, senha, link, assunto });
+  }
+}
+
+async function enviarMockPrimeiroAcesso({ to, nome, login, senha, link, assunto }) {
+  console.info(
+    `[EmailMock] ${assunto} para ${nome || "Colaborador"} <${to}>. Login: ${login} | Senha: ${senha} | Link: ${link}`
+  );
+  return new Promise((resolve) => setTimeout(resolve, 300));
+}
+
+export async function enviarEmailAprovacao({ to, nome, link }) {
+  if (!to) {
+    throw new Error("E-mail do destinatário é obrigatório.");
+  }
+
+  const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+  const templateId = "template_3sdo7bu";
+  const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+
+  if (!serviceId || !templateId || !publicKey) {
+    const assunto = "Solicitação aprovada. Continue a validação.";
+    await enviarAssinaturaMock({ to, nome, link, assunto });
+    return;
+  }
+
+  const templateParams = {
+    email: to,
+    name: nome || "Colaborador",
+    link,
+  };
+
+  try {
+    await emailjs.send(serviceId, templateId, templateParams, publicKey);
+  } catch (error) {
+    console.error("[EmailService] Falha no envio real, usando mock:", error);
+    const assunto = "Solicitação aprovada. Continue a validação.";
+    await enviarAssinaturaMock({ to, nome, link, assunto });
+  }
+}
+
+export async function enviarEmailRecusa({ to, nome }) {
+  if (!to) {
+    throw new Error("E-mail do destinatário é obrigatório.");
+  }
+
+  const assunto = "Solicitação recusada pelo banco.";
+  await enviarAssinaturaMock({ to, nome, link: "", assunto });
+}
+
+export async function enviarEmailPagamento({ to, nome }) {
+  if (!to) {
+    throw new Error("E-mail do destinatário é obrigatório.");
+  }
+
+  const assunto =
+    "Pagamento confirmado. O valor cai na conta salario em ate 3 dias.";
+  await enviarAssinaturaMock({ to, nome, link: "", assunto });
+}

@@ -7,8 +7,10 @@ import AdminSolicitacoes from "@/pages/admin/solicitacoes.vue";
 import SolicitacoesValidar from "@/pages/admin/solicitacoesValidar.vue";
 import AdminColaboradores from "@/pages/admin/colaborador.vue";
 import ColaboradorForm from "@/pages/admin/colaboradorForm.vue";
+import AdminRelatorios from "@/pages/admin/relatorios.vue";
 import LoginPage from "@/pages/login.vue";
 import AssinaturaPage from "@/pages/assinatura.vue";
+import ValidacaoPage from "@/pages/validacao.vue";
 
 const routes = [
   { path: "/", redirect: "/totem" },
@@ -50,6 +52,12 @@ const routes = [
     component: ColaboradorForm,
     meta: { requiresAuth: true },
   },
+  {
+    path: "/admin/relatorios",
+    name: "AdminRelatorios",
+    component: AdminRelatorios,
+    meta: { requiresAuth: true },
+  },
 
   // --- Login ---
   { path: "/login", name: "Login", component: LoginPage },
@@ -60,6 +68,9 @@ const routes = [
     name: "AssinaturaEletronica",
     component: AssinaturaPage,
   },
+
+  // --- Validacao de identidade ---
+  { path: "/validacao", name: "Validacao", component: ValidacaoPage },
 
   // --- Rota padrão 404 ---
   { path: "/:pathMatch(.*)*", redirect: "/totem" },

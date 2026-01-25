@@ -20,7 +20,7 @@
           <v-col cols="12" md="3">
             <v-select
               v-model="filtroStatus"
-              :items="['Todos', 'PENDENTE', 'APROVADA', 'CANCELADA']"
+              :items="['Todos', 'PENDENTE', 'APROVADA', 'CANCELADA', 'VALIDADA']"
               label="Status"
               density="compact"
             />
@@ -53,7 +53,7 @@
             </div>
 
             <div class="text-body-2 mb-1">
-              Valor: <strong>{{ item.valor }}</strong>
+              Valor total: <strong>R$ {{ formatarMoeda(item.valorTotal || item.valor) }}</strong>
             </div>
 
             <div class="text-body-2 mb-3">
@@ -93,6 +93,9 @@
         density="comfortable"
         no-data-text="Nenhuma solicitação encontrada"
       >
+        <template #item.valorTotal="{ item }">
+          R$ {{ formatarMoeda(item.valorTotal || item.valor) }}
+        </template>
         <template #item.status="{ item }">
           <v-chip
             size="small"
@@ -143,7 +146,7 @@ const filtroStatus = ref('Todos')
 const headers = [
   { title: 'Nome', key: 'nome' },
   { title: 'CPF', key: 'cpf' },
-  { title: 'Valor', key: 'valor' },
+  { title: 'Valor total', key: 'valorTotal' },
   { title: 'Data', key: 'data' },
   { title: 'Status', key: 'status' },
   { title: 'Ações', key: 'actions', sortable: false },
@@ -175,7 +178,13 @@ function statusColor(status) {
   if (status === 'APROVADA') return 'success'
   if (status === 'CANCELADA') return 'error'
   if (status === 'PENDENTE') return 'warning'
+  if (status === 'VALIDADA') return 'primary'
   return 'grey'
+}
+
+function formatarMoeda(valor) {
+  if (valor === null || valor === undefined) return '-'
+  return Number(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })
 }
 
 function abrirDetalhes(id) {

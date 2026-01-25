@@ -99,3 +99,38 @@ export async function getColaboradorByCpf(cpf) {
 
   return colabFallback || null;
 }
+
+// --- Portal do colaborador ---
+export async function listColaboradoresPortal() {
+  return supabaseRequest("colaboradores_portal");
+}
+
+export async function saveColaboradorPortal(colaborador) {
+  const response = await supabaseRequest("colaboradores_portal", {
+    method: "POST",
+    body: [colaborador],
+  });
+  return Array.isArray(response) ? response[0] : response;
+}
+
+export async function updateColaboradorPortal(id, data) {
+  const response = await supabaseRequest("colaboradores_portal", {
+    method: "PATCH",
+    query: { id: `eq.${id}` },
+    body: data,
+  });
+  return Array.isArray(response) ? response[0] : response;
+}
+
+// --- Relatorios ---
+export async function listRelatorios() {
+  return supabaseRequest("relatorios");
+}
+
+export async function saveRelatorio(relatorio) {
+  const response = await supabaseRequest("relatorios", {
+    method: "POST",
+    body: [relatorio],
+  });
+  return Array.isArray(response) ? response[0] : response;
+}

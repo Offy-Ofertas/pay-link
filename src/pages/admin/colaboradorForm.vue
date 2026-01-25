@@ -83,6 +83,23 @@
 
                         <v-col cols="12" md="6">
                             <v-text-field
+                                v-model="form.dataNascimento"
+                                label="Data de nascimento"
+                                type="date"
+                                prepend-inner-icon="mdi-calendar"
+                            />
+                        </v-col>
+
+                        <v-col cols="12" md="6">
+                            <v-text-field
+                                v-model="form.contaSalario"
+                                label="Conta salario"
+                                prepend-inner-icon="mdi-bank"
+                            />
+                        </v-col>
+
+                        <v-col cols="12" md="6">
+                            <v-text-field
                                 v-model="form.admissao"
                                 label="Data de admissão"
                                 type="date"
@@ -96,6 +113,40 @@
                                 label="Data de demissão"
                                 type="date"
                                 prepend-inner-icon="mdi-calendar-remove"
+                            />
+                        </v-col>
+
+                        <v-col cols="12" md="4">
+                            <v-text-field
+                                v-model.number="form.mesesEmpresa"
+                                label="Meses de empresa"
+                                type="number"
+                                min="0"
+                                prepend-inner-icon="mdi-timeline-clock"
+                            />
+                        </v-col>
+
+                        <v-col cols="12" md="4">
+                            <v-switch
+                                v-model="form.menorAprendiz"
+                                label="Menor aprendiz"
+                                color="primary"
+                            />
+                        </v-col>
+
+                        <v-col cols="12" md="4">
+                            <v-switch
+                                v-model="form.avisoPrevio"
+                                label="Aviso previo"
+                                color="primary"
+                            />
+                        </v-col>
+
+                        <v-col cols="12" md="4">
+                            <v-switch
+                                v-model="form.aptoEmprestimo"
+                                label="Apto para emprestimo"
+                                color="primary"
                             />
                         </v-col>
                     </v-row>
@@ -143,8 +194,14 @@ const form = ref({
     salario: "",
     email: "",
     telefone: "",
+    dataNascimento: "",
+    contaSalario: "",
     admissao: "",
     demissao: "",
+    mesesEmpresa: null,
+    menorAprendiz: false,
+    avisoPrevio: false,
+    aptoEmprestimo: true,
 });
 
 const isEdit = computed(() => !!route.params.id);
@@ -166,14 +223,15 @@ onMounted(async () => {
 
         form.value = {
             ...existente,
-            salario: existente.salario
-                ? existente.salario.toLocaleString("pt-BR", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                  })
-                : "",
+            salario: formatarSalario(existente.salario),
             admissao: existente.admissao || "",
             demissao: existente.demissao || "",
+            dataNascimento: existente.data_nascimento || existente.dataNascimento || "",
+            contaSalario: existente.conta_salario || existente.contaSalario || "",
+            mesesEmpresa: existente.meses_empresa ?? existente.mesesEmpresa ?? null,
+            menorAprendiz: existente.menor_aprendiz ?? existente.menorAprendiz ?? false,
+            avisoPrevio: existente.aviso_previo ?? existente.avisoPrevio ?? false,
+            aptoEmprestimo: existente.apto_emprestimo ?? existente.aptoEmprestimo ?? true,
         };
     }
 });
@@ -253,6 +311,22 @@ function salarioParaNumero(valor) {
             .replace(/\./g, "")
             .replace(",", ".")
     );
+}
+
+function formatarSalario(valor) {
+    if (valor === null || valor === undefined || valor === "") return "";
+    if (typeof valor === "number") {
+        return valor.toLocaleString("pt-BR", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        });
+    }
+    const numero = salarioParaNumero(String(valor));
+    if (Number.isNaN(numero)) return "";
+    return numero.toLocaleString("pt-BR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    });
 }
 
 function cpfEhValido(cpf) {

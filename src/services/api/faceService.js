@@ -12,15 +12,12 @@ async function gerarHashBase64(texto) {
 
 export async function buscarFacePorColaboradorId(colaboradorId) {
   if (!colaboradorId) return null;
-  const resposta = await supabaseRequest(
-    `${TABELA}`,
-    {
-      query: {
-        colaborador_id: `eq.${colaboradorId}`,
-        limit: 1,
-      },
-    }
-  );
+  const resposta = await supabaseRequest(`${TABELA}`, {
+    query: {
+      colaborador_id: `eq.${colaboradorId}`,
+      limit: 1,
+    },
+  });
 
   return Array.isArray(resposta) && resposta.length ? resposta[0] : null;
 }
@@ -44,16 +41,21 @@ export async function registrarOuAtualizarFace({
     updated_at: new Date().toISOString(),
   };
 
-  const resposta = await supabaseRequest(
-    `${TABELA}?on_conflict=colaborador_id`,
-    {
-      method: "POST",
-      body: [payload],
-    }
-  );
+  const existente = await buscarFacePorColaboradorId(colaboradorId);
+  const registro = existente
+    ? await supabaseRequest(`${TABELA}`, {
+        method: "PATCH",
+        query: { id: `eq.${existente.id}` },
+        body: payload,
+      })
+    : await supabaseRequest(`${TABELA}`, {
+        method: "POST",
+        body: [payload],
+      });
 
-  const registro = Array.isArray(resposta) && resposta.length ? resposta[0] : resposta;
-  return { registro, faceHash, status: "registrado" };
+  const registroFinal =
+    Array.isArray(registro) && registro.length ? registro[0] : registro;
+  return { registro: registroFinal, faceHash, status: "registrado" };
 }
 
 function hammingDistance(a = "", b = "") {

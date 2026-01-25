@@ -12,8 +12,10 @@
                         <h3 class="text-subtitle-1 font-weight-bold mb-2">Dados do colaborador</h3>
                         <p><strong>Nome:</strong> {{ solicitacao.nome }}</p>
                         <p><strong>CPF:</strong> {{ solicitacao.cpf }}</p>
-                        <p><strong>Valor:</strong> {{ solicitacao.valor }}</p>
-                        <p><strong>Data do pagamento:</strong> {{ solicitacao.data }}</p>
+                        <p><strong>Valor solicitado:</strong> R$ {{ formatarMoeda(solicitacao.valorSolicitado || solicitacao.valor) }}</p>
+                        <p><strong>Valor total:</strong> R$ {{ formatarMoeda(solicitacao.valorTotal || solicitacao.valor) }}</p>
+                        <p><strong>Parcelas:</strong> {{ solicitacao.parcelas }}x</p>
+                        <p><strong>Data da solicitação:</strong> {{ solicitacao.data }}</p>
                         <p><strong>Solicitado em:</strong> {{ formatarDataHora(solicitacao.criado_em || solicitacao.criadoEm) }}</p>
                         <p v-if="solicitacao.processadoEm || solicitacao.processado_em"><strong>Processado em:</strong>
                             {{ formatarDataHora(solicitacao.processadoEm || solicitacao.processado_em) }}</p>
@@ -30,13 +32,17 @@
                 <v-divider class="my-6"></v-divider>
 
                 <v-alert v-if="ehPendente" type="info" variant="tonal" class="mb-4">
-                    Confirme a solicitação de adiantamento. Após validar, o colaborador será notificado via WhatsApp.
+                    Confirme a solicitacao de microcredito. Após aprovar, o colaborador recebera um e-mail com o link de validacao.
                 </v-alert>
 
                 <v-alert v-else-if="ehAprovada" type="success" variant="tonal" class="mb-4">
-                    Esta solicitação foi aprovada em
+                    Esta solicitacao foi aprovada em
                     <strong>{{ formatarDataHora(solicitacao.processadoEm || solicitacao.processado_em) }}</strong>. As informações abaixo são apenas
                     para consulta.
+                </v-alert>
+
+                <v-alert v-else-if="ehValidada" type="success" variant="tonal" class="mb-4">
+                    O colaborador concluiu a validacao e o pagamento esta em processamento.
                 </v-alert>
 
                 <v-alert v-else-if="ehCancelada" type="warning" variant="tonal" class="mb-4">
@@ -66,7 +72,7 @@
                     </v-col>
                 </v-row>
 
-                <v-row v-else-if="ehAprovada">
+                <v-row v-else-if="ehAprovada || ehValidada">
                     <v-col cols="12" md="4">
                         <v-btn color="primary" block @click="voltarParaLista">
                             <v-icon start>mdi-arrow-left</v-icon> Voltar
@@ -136,6 +142,7 @@
     const ehPendente = computed(() => statusAtual.value === "PENDENTE");
     const ehAprovada = computed(() => statusAtual.value === "APROVADA");
     const ehCancelada = computed(() => statusAtual.value === "CANCELADA");
+    const ehValidada = computed(() => statusAtual.value === "VALIDADA");
     const nomeColaborador = computed(() => solicitacao.value?.nome || "o colaborador");
     const infoReaplicacao = computed(() => {
         if (!ehCancelada.value) {
@@ -193,8 +200,14 @@
             case "APROVADA": return "success";
             case "CANCELADA": return "error";
             case "PENDENTE": return "warning";
+            case "VALIDADA": return "primary";
             default: return "grey";
         }
+    }
+
+    function formatarMoeda(valor) {
+        if (valor === null || valor === undefined) return "—";
+        return Number(valor).toLocaleString("pt-BR", { minimumFractionDigits: 2 });
     }
 
     function formatarDataHora(isoString) {
