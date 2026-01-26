@@ -14,9 +14,29 @@
               clearable
             />
           </v-col>
-          <v-col cols="12" md="4" class="d-flex justify-end">
+          <v-col cols="12" md="3">
+            <v-text-field
+              v-model="dataInicio"
+              type="date"
+              label="Data inicio"
+              density="compact"
+              clearable
+              :max="dataFim || undefined"
+            />
+          </v-col>
+          <v-col cols="12" md="3">
+            <v-text-field
+              v-model="dataFim"
+              type="date"
+              label="Data fim"
+              density="compact"
+              clearable
+              :min="dataInicio || undefined"
+            />
+          </v-col>
+          <v-col cols="12" md="2" class="d-flex justify-end">
             <v-btn color="primary" variant="tonal" @click="exportarRelatorio">
-              Exportar Excel (CSV)
+              Gerar relatorio (CSV)
             </v-btn>
           </v-col>
         </v-row>
@@ -29,6 +49,19 @@
         density="comfortable"
         no-data-text="Nenhum relatorio encontrado"
       >
+        <template #header.selecionado>
+          <v-checkbox-btn
+            :model-value="todosSelecionados"
+            :indeterminate="algunsSelecionados"
+            @update:model-value="alternarSelecionarTodos"
+          />
+        </template>
+        <template #item.selecionado="{ item }">
+          <v-checkbox-btn
+            :model-value="selecionados.includes(item._id)"
+            @update:model-value="() => alternarSelecao(item._id)"
+          />
+        </template>
         <template #item.valorTotal="{ item }">
           R$ {{ formatarMoeda(item.valor_total || item.valorTotal) }}
         </template>
@@ -49,7 +82,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import Papa from "papaparse";
 import AdminLayout from "@/layouts/AdminLayout.vue";
 import BaseSnackbar from "@/components/Shared/BaseSnackbar.vue";
@@ -57,8 +90,12 @@ import { useAdminStore } from "@/stores/admin";
 
 const admin = useAdminStore();
 const filtroNome = ref("");
+const dataInicio = ref("");
+const dataFim = ref("");
+const selecionados = ref([]);
 
 const headers = [
+  { title: "", key: "selecionado", sortable: false, width: 48 },
   { title: "Nome", key: "nome" },
   { title: "CPF", key: "cpf" },
   { title: "Valor total", key: "valorTotal" },
@@ -73,11 +110,56 @@ onMounted(() => {
 
 const relatoriosFiltrados = computed(() => {
   const termo = filtroNome.value.toLowerCase();
-  return admin.relatorios.filter((r) => {
-    return (
-      r.nome?.toLowerCase().includes(termo) || String(r.cpf || "").includes(termo)
-    );
-  });
+  const inicioMs = parseDateInput(dataInicio.value, false);
+  const fimMs = parseDateInput(dataFim.value, true);
+
+  return admin.relatorios
+    .filter((r) => {
+      const matchTexto =
+        r.nome?.toLowerCase().includes(termo) ||
+        String(r.cpf || "").includes(termo);
+
+      if (!matchTexto) return false;
+
+      const criadoEmMs = parseRelatorioDate(r);
+      if (inicioMs !== null && (criadoEmMs === null || criadoEmMs < inicioMs)) {
+        return false;
+      }
+      if (fimMs !== null && (criadoEmMs === null || criadoEmMs > fimMs)) {
+        return false;
+      }
+      return true;
+    })
+    .map((r, index) => ({
+      ...r,
+      _id: getRelatorioId(r, index),
+    }));
+});
+
+const todosSelecionados = computed(() => {
+  if (!relatoriosFiltrados.value.length) return false;
+  return relatoriosFiltrados.value.every((item) =>
+    selecionados.value.includes(item._id)
+  );
+});
+
+const algunsSelecionados = computed(() => {
+  if (!relatoriosFiltrados.value.length) return false;
+  const algum = relatoriosFiltrados.value.some((item) =>
+    selecionados.value.includes(item._id)
+  );
+  return algum && !todosSelecionados.value;
+});
+
+const relatoriosParaExportar = computed(() => {
+  if (!selecionados.value.length) return relatoriosFiltrados.value;
+  const ids = new Set(selecionados.value);
+  return relatoriosFiltrados.value.filter((item) => ids.has(item._id));
+});
+
+watch(relatoriosFiltrados, (lista) => {
+  const ids = new Set(lista.map((item) => item._id));
+  selecionados.value = selecionados.value.filter((id) => ids.has(id));
 });
 
 function formatarMoeda(valor) {
@@ -92,8 +174,57 @@ function formatarData(data) {
   return dt.toLocaleDateString("pt-BR");
 }
 
+function parseDateInput(valor, endOfDay) {
+  if (!valor) return null;
+  const [ano, mes, dia] = valor.split("-").map(Number);
+  if (!ano || !mes || !dia) return null;
+  const dt = new Date(ano, mes - 1, dia);
+  if (endOfDay) {
+    dt.setHours(23, 59, 59, 999);
+  } else {
+    dt.setHours(0, 0, 0, 0);
+  }
+  return dt.getTime();
+}
+
+function parseRelatorioDate(item) {
+  const data = item.criado_em || item.criadoEm;
+  if (!data) return null;
+  const dt = new Date(data);
+  if (Number.isNaN(dt.getTime())) return null;
+  dt.setHours(0, 0, 0, 0);
+  return dt.getTime();
+}
+
+function getRelatorioId(item, index) {
+  return String(
+    item.solicitacao_id ||
+      item.solicitacaoId ||
+      item.id ||
+      item.uuid ||
+      `${item.cpf || "cpf"}-${item.criado_em || item.criadoEm || index}`
+  );
+}
+
+function alternarSelecao(id) {
+  const idx = selecionados.value.indexOf(id);
+  if (idx >= 0) {
+    selecionados.value.splice(idx, 1);
+  } else {
+    selecionados.value.push(id);
+  }
+}
+
+function alternarSelecionarTodos(valor) {
+  if (valor) {
+    selecionados.value = relatoriosFiltrados.value.map((item) => item._id);
+  } else {
+    selecionados.value = [];
+  }
+}
+
 function exportarRelatorio() {
-  const linhas = relatoriosFiltrados.value.map((item) => ({
+  const linhas = relatoriosParaExportar.value.map((item) => ({
     nome: item.nome || "",
     cpf: item.cpf || "",
     email: item.email || item.email_colaborador || "",

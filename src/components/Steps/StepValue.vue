@@ -3,7 +3,7 @@
     <v-card
       class="step-card"
       :class="{ 'step-card--mobile': smAndDown }"
-      :elevation="smAndDown ? 0 : 10"
+      :elevation="smAndDown ? 0 : 1"
       :max-width="smAndDown ? '100%' : 480"
     >
       <div class="content">
@@ -223,6 +223,8 @@ function avancar() {
 .step-card {
   padding: 28px;
   border-radius: 16px;
+  border: none;
+  box-shadow: none;
 }
 
 .step-card--mobile {
